@@ -1,0 +1,11 @@
+1.Start the local MongoDB Instance: Ensure your backend URI string is setup.
+
+2.Launch Backend:
+bashcd backend
+npm install
+npm start
+
+3.Launch Frontend React Instance:
+bashcd frontend
+npm install
+npm run dev
