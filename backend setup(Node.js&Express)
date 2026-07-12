@@ -1,0 +1,73 @@
+backend/models/Transactions.js
+/*javascrpt*/
+
+const mongoose = require('mongoose');
+
+const TransactionSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  amount: { type: Number, required: true },
+  type: { type: String, enum: ['income', 'expense'], required: true },
+  category: { type: String, required: true },
+  date: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('Transaction', TransactionSchema);
+
+
+backend/server.js
+/*javascript*/
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
+
+const Transaction = require('./models/Transaction');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// Database Connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
+
+// API Routes
+app.get('/api/transactions', async (req, res) => {
+  try {
+    const transactions = await Transaction.find().sort({ date: -1 });
+    res.json(transactions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/transactions', async (req, res) => {
+  try {
+    const newTransaction = new Transaction(req.body);
+    const savedTransaction = await newTransaction.save();
+    res.json(savedTransaction);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});/.env
+
+app.delete('/api/transactions/:id', async (req, res) => {
+  try {
+    await Transaction.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Transaction deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+backend/.env
+ENV
+
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/expensetracker
